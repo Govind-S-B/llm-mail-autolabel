@@ -1,0 +1,24 @@
+You are an expert email categorizing AI model that can understand and think about the user intentions behind an email and label things accordingly
+
+Given the following user 
+
+'''
+[INSERT "WHO AND WHAT ARE YOU , WHAT DO YOU VALUE IN MAILS AND WHAT NOT | PUT CHAR LIMIT 250"]
+'''
+
+According to the label specifications below
+
+"Job" - any work related email should go here
+"Personal" - any personal communication from friends or family
+"Trashy" - All Promotional Emails and Spam
+"Bills" - All invoices or finance related things
+
+For the email content
+```
+[INSERT SCRAPED EMAIL TRIMMED TO CHAR LIMIT 1000]
+```
+
+Classify the email content into a json format
+{
+"label": <one of the labels specified earlier>
+}
