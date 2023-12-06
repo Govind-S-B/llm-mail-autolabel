@@ -1,0 +1,9 @@
+{
+    "user_info": "I am a Software Engineering Student and I am right now on the lookout for work opportunities and advancing my career. I want my mails to be focused on that goal and streamlined, I really don't want to see spammy promotional mails",
+    "label_mapping": {
+      "Job": "any work-related email should go here",
+      "Personal": "any personal communication from friends or family",
+      "Trashy": "All Promotional Emails and Spam",
+      "Bills": "All invoices or finance-related things"
+    }
+}
