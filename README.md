@@ -49,7 +49,7 @@ You can set this up manually or just contact us and we will give your our creden
    ```
 3. Temporarily ( till the front end is up and running ) configure the user info in `user_info.json`
 
-## Usage
+### Usage
 
 1. Run the script:
    ```
