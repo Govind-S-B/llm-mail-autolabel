@@ -2,7 +2,7 @@ import os
 import requests
 import json
 
-def mail_processor(user_info,label_mapping,mail_body,llm_online=False,api_key=None):
+def mail_processor(user_info, label_mapping, mail_body, llm_online=False, api_key=None):
     """
     Classifies the given email and returns an appropriate label and reason.
 
@@ -57,12 +57,18 @@ def mail_processor(user_info,label_mapping,mail_body,llm_online=False,api_key=No
             params={"key": api_key}
         )
 
+        # print(prompt)
+        # print(f"Response: {response.json()}\n")
         # print(response.json()['candidates'][0]['output']) # Print the response
-        response = json.loads(response.json()['candidates'][0]['output'].replace("```",""))
-        label,reason = response["label"],response["reason"]
+
+        if 'candidates' not in response.json():
+            raise ValueError("Invalid response from Google PALM API")
+        
+        response = json.loads(response.json()['candidates'][0]['output'].replace("json","").replace("```",""))
+        label, reason = response["label"], response["reason"]
+
     else:
         url = "http://localhost:11434/api/generate"
-
         response = requests.post(
             url,
             headers={"Content-Type": "application/json"},
@@ -70,16 +76,16 @@ def mail_processor(user_info,label_mapping,mail_body,llm_online=False,api_key=No
         )
 
         response = json.loads(json.loads(response.text)["response"])
-        label,reason = response["label"],response["reason"]
+        label, reason = response["label"], response["reason"]
 
-    return label,reason
+    return label, reason
 
 if __name__ == "__main__":
 
     from dotenv import load_dotenv
 
     load_dotenv()
-    api_key = os.getenv("PLAM_API_KEY")
+    api_key = os.getenv("PALM_API_KEY")
 
     print(mail_processor(
         user_info = 
