@@ -22,18 +22,23 @@ def extract_user_info(json_file_path='user_info.json'):
 
 def write_to_csv(data, file_path='logs.csv'):
     # Write data to CSV file
-    with open(file_path, mode='w', newline='', encoding='utf-8') as csv_file:
+    with open(file_path, mode='a', newline='', encoding='utf-8') as csv_file:
         csv_writer = csv.writer(csv_file)
         csv_writer.writerow(data)
+
+def clear_logs(file_path='logs.csv'):
+    # Clear contents of CSV file
+    with open(file_path, mode='w', newline='') as csv_file:
+        pass
 
 
 if __name__ == "__main__":
     service = gmail.get_gmail_service()
 
     user_info, label_mapping = extract_user_info()
+    messages = gmail.fetch_emails(service, max_results=25)
 
-    messages = gmail.fetch_emails(service, max_results=5)
-
+    clear_logs()
     for index, message_id in enumerate(messages):
         print(f"{index+1}. Message ID - {message_id}")
 
