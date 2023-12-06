@@ -6,7 +6,7 @@ from google.auth.transport.requests import Request
 import base64
 from bs4 import BeautifulSoup
 
-## Set Edge as default browser
+# Set Edge as default browser
 # import webbrowser
 # url = "https://www.google.com"
 # edge_path = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
@@ -14,6 +14,20 @@ from bs4 import BeautifulSoup
 
 # Set up the Gmail API
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
+
+
+def get_body(parts):
+    data = ""
+    if 'parts' in parts:
+        for part in parts['parts']:
+            # if 'data' in part['body']:
+            #     data += part['body']['data']
+            data += get_body(part)
+
+        return data
+    else:
+        return parts['body']['data']
+
 
 def get_gmail_service():
     # Check if token file exists
@@ -26,7 +40,8 @@ def get_gmail_service():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
 
         # Save the credentials for the next run
@@ -93,10 +108,12 @@ def fetch_emails(service, max_results=10):
         list: A list of dictionaries representing the fetched emails.
     """
 
-    results = service.users().messages().list(userId='me', maxResults=max_results).execute()
+    results = service.users().messages().list(
+        userId='me', maxResults=max_results).execute()
     messages = results.get('messages', [])
     message_ids = [message['id'] for message in messages]
     return message_ids
+
 
 def fetch_email_content(service, message_id):
     """
@@ -111,38 +128,38 @@ def fetch_email_content(service, message_id):
     """
 
     message = service.users().messages().get(userId='me', id=message_id).execute()
-    # Get value of 'payload' from dictionary 'message' 
-    payload = message['payload'] 
-    headers = payload['headers'] 
+    # Get value of 'payload' from dictionary 'message'
+    payload = message['payload']
+    headers = payload['headers']
     # print(headers)
     # print(payload)
 
-    # Look for Subject and Sender Email in the headers 
-    for d in headers: 
-        if d['name'] == 'Subject': 
-            subject = d['value'] 
-        if d['name'] == 'From': 
-            sender = d['value'] 
+    # Look for Subject and Sender Email in the headers
+    for d in headers:
+        if d['name'] == 'Subject':
+            subject = d['value']
+        if d['name'] == 'From':
+            sender = d['value']
 
-    # The Body of the message is in Encrypted format. So, we have to decode it. 
-    # Get the data and decode it with base 64 decoder. 
-    parts = payload.get('parts')[0] 
+    # The Body of the message is in Encrypted format. So, we have to decode it.
+    # Get the data and decode it with base 64 decoder.
+    data = get_body(payload.get('parts')[0])
 
-    data = ""
-    if 'parts' in parts:
-        for part in parts['parts']:
-            if 'data' in part['body']:
-                data += part['body']['data'] 
-    else:
-        data = parts['body']['data']
+    # data = ""
+    # if 'parts' in parts:
+    #     for part in parts['parts']:
+    #         if 'data' in part['body']:
+    #             data += part['body']['data']
+    # else:
+    #     data = parts['body']['data']
 
     # print(data)
-    data = data.replace("-","+").replace("_","/") 
-    decoded_data = base64.b64decode(data) 
+    data = data.replace("-", "+").replace("_", "/")
+    decoded_data = base64.b64decode(data)
 
-    # Now, the data obtained is in lxml. So, we will parse it with BeautifulSoup library 
-    soup = BeautifulSoup(decoded_data , "lxml") 
-    body = soup.body() 
+    # Now, the data obtained is in lxml. So, we will parse it with BeautifulSoup library
+    soup = BeautifulSoup(decoded_data, "lxml")
+    body = soup.body()
 
     response = {
         "sender": sender,
@@ -150,6 +167,7 @@ def fetch_email_content(service, message_id):
         "body": body
     }
     return response
+
 
 def add_label(service, message_id, label):
     """
@@ -164,13 +182,14 @@ def add_label(service, message_id, label):
 
     labels = list_labels(service)
     label_id_to_apply = labels[label]
-    
+
     service.users().messages().modify(
         userId='me',
         id=message_id,
         body={'addLabelIds': [label_id_to_apply]}
     ).execute()
     print(f"Label '{label}' applied to the email successfully.\n")
+
 
 def create_label(service, label_name):
     """
@@ -207,7 +226,7 @@ if __name__ == "__main__":
         print('-'*40)
         for label, label_id in labels.items():
             print(f"{label}\t\t\t{label_id}")
-    
+
     # Fetch and list the latest, specified number of emails
     max_results = input("\nEnter the number of emails to fetch: ")
     messages = fetch_emails(service, max_results=max_results)
@@ -216,13 +235,14 @@ if __name__ == "__main__":
     else:
         print(f"\n{'-'*15}Emails{'-'*15}")
         for message in messages:
-            print(f"Message ID - {message['id']}")    # Fetch and display the content of the first email
+            # Fetch and display the content of the first email
+            print(f"Message ID - {message['id']}")
             try:
                 message_content = fetch_email_content(service, message['id'])
-                print(f"From - {message_content['sender']} \nSubject - {message_content['subject']} \n")
+                print(
+                    f"From - {message_content['sender']} \nSubject - {message_content['subject']} \n")
             except Exception as e:
                 print(f"Error fetching email content: {e}\n")
-
 
     while True:
         message_id = input("\nEnter the message ID to apply label: ")
