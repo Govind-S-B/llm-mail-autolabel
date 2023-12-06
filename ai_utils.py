@@ -45,7 +45,7 @@ def mail_processor(user_info, label_mapping, mail_body, llm_online=False, api_ke
     }}
 
     Return only the json
-    """.format(user_info, label_mapping, mail_body)
+    """.format(user_info, label_mapping, str(mail_body)[0:1000])
 
     if llm_online:
         url = "https://generativelanguage.googleapis.com/v1beta3/models/text-bison-001:generateText"
