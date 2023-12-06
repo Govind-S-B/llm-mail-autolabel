@@ -57,12 +57,18 @@ def mail_processor(user_info, label_mapping, mail_body, llm_online=False, api_ke
             params={"key": api_key}
         )
 
+        # print(prompt)
+        # print(f"Response: {response.json()}\n")
         # print(response.json()['candidates'][0]['output']) # Print the response
-        response = json.loads(response.json()['candidates'][0]['output'].replace("```",""))
+
+        if 'candidates' not in response.json():
+            raise ValueError("Invalid response from Google PALM API")
+        
+        response = json.loads(response.json()['candidates'][0]['output'].replace("json","").replace("```",""))
         label, reason = response["label"], response["reason"]
+
     else:
         url = "http://localhost:11434/api/generate"
-
         response = requests.post(
             url,
             headers={"Content-Type": "application/json"},
@@ -70,7 +76,7 @@ def mail_processor(user_info, label_mapping, mail_body, llm_online=False, api_ke
         )
 
         response = json.loads(json.loads(response.text)["response"])
-        label,reason = response["label"],response["reason"]
+        label, reason = response["label"], response["reason"]
 
     return label, reason
 

@@ -109,10 +109,13 @@ def fetch_email_content(service, message_id):
     Returns:
         dict: A dictionary containing the email content (subject, sender, body).
     """
+
     message = service.users().messages().get(userId='me', id=message_id).execute()
     # Get value of 'payload' from dictionary 'message' 
     payload = message['payload'] 
     headers = payload['headers'] 
+    # print(headers)
+    # print(payload)
 
     # Look for Subject and Sender Email in the headers 
     for d in headers: 
@@ -124,7 +127,16 @@ def fetch_email_content(service, message_id):
     # The Body of the message is in Encrypted format. So, we have to decode it. 
     # Get the data and decode it with base 64 decoder. 
     parts = payload.get('parts')[0] 
-    data = parts['body']['data'] 
+
+    data = ""
+    if 'parts' in parts:
+        for part in parts['parts']:
+            if 'data' in part['body']:
+                data += part['body']['data'] 
+    else:
+        data = parts['body']['data']
+
+    # print(data)
     data = data.replace("-","+").replace("_","/") 
     decoded_data = base64.b64decode(data) 
 
@@ -151,20 +163,14 @@ def add_label(service, message_id, label):
     """
 
     labels = list_labels(service)
-    try:
-        label_id_to_apply = labels[label]
-    except KeyError:
-        raise KeyError(f"Label '{label}' not found.")
+    label_id_to_apply = labels[label]
     
-    try:
-        service.users().messages().modify(
-            userId='me',
-            id=message_id,
-            body={'addLabelIds': [label_id_to_apply]}
-        ).execute()
-        print(f"Label '{label}' applied to the email successfully.")
-    except Exception as e:
-        raise Exception(f"Error applying label: {e}")
+    service.users().messages().modify(
+        userId='me',
+        id=message_id,
+        body={'addLabelIds': [label_id_to_apply]}
+    ).execute()
+    print(f"Label '{label}' applied to the email successfully.\n")
 
 def create_label(service, label_name):
     """
@@ -178,18 +184,14 @@ def create_label(service, label_name):
         str: The ID of the created label.
     """
 
-    try:
-        created_label = service.users().labels().create(
-            userId='me',
-            body={'name': label_name}
-        ).execute()
+    created_label = service.users().labels().create(
+        userId='me',
+        body={'name': label_name}
+    ).execute()
 
-        label_id = created_label['id']
-        print(f"Label '{label_name}' created with ID: {label_id}")
-        return label_id
-
-    except Exception as e:
-        raise Exception(f"Error creating label: {e}")
+    label_id = created_label['id']
+    print(f"Label '{label_name}' created with ID: {label_id}\n")
+    return label_id
 
 
 if __name__ == "__main__":

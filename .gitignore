@@ -2,3 +2,5 @@
 credentials.json
 token.json
 venv/
+__pycache__/
+logs.csv
