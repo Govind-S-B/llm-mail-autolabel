@@ -156,10 +156,12 @@ def fetch_email_content(service, message_id):
     # print(data)
     data = data.replace("-", "+").replace("_", "/")
     decoded_data = base64.b64decode(data)
+    # print(decoded_data)
 
     # Now, the data obtained is in lxml. So, we will parse it with BeautifulSoup library
     soup = BeautifulSoup(decoded_data, "lxml")
     body = soup.body()
+    # print(body)
 
     response = {
         "sender": sender,

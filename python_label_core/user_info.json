@@ -5,5 +5,6 @@
       "Personal": "any personal communication from friends or family",
       "Trashy": "All Promotional Emails and Spam",
       "Bills": "All invoices or finance-related things"
-    }
+    },
+    "max_results": 25
 }

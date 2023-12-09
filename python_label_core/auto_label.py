@@ -17,8 +17,9 @@ def extract_user_info(json_file_path='user_info.json'):
     # Extract information
     user_info = data.get('user_info', '')
     label_mapping = data.get('label_mapping', {})
+    max_results = data.get('max_results', 15)
 
-    return user_info, label_mapping
+    return user_info, label_mapping, max_results
 
 def write_to_csv(data, file_path='logs.csv'):
     # Write data to CSV file
@@ -35,8 +36,8 @@ def clear_logs(file_path='logs.csv'):
 if __name__ == "__main__":
     service = gmail.get_gmail_service()
 
-    user_info, label_mapping = extract_user_info()
-    messages = gmail.fetch_emails(service, max_results=25)
+    user_info, label_mapping, max_results = extract_user_info()
+    messages = gmail.fetch_emails(service, max_results)
 
     clear_logs()
     for index, message_id in enumerate(messages):
