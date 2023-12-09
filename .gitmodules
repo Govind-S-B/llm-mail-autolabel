@@ -1,3 +1,3 @@
 [submodule "Gmail-autolabel-forntend"]
-	path = Gmail-autolabel-forntend
+	path = flutter_frontend
 	url = https://github.com/jydv402/Gmail-autolabel-forntend.git
