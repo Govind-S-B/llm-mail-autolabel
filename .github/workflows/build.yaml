@@ -1,0 +1,50 @@
+name: Windows Binary Build Workflow
+on:
+  workflow_dispatch:
+    
+jobs:
+  Windows_Python_Build:
+    name: Windows Python Binary Build
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: dev
+        
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip' # caching pip dependencies
+    - run: |
+        pip install -r python_label_core/requirements.txt
+        ./build_python_win.bat
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git pull
+        git add binary_build/
+        git commit -m "generated auto-labeller"
+        git pull --no-edit
+        git push
+        git push -f origin dev
+        
+  Windows_Flutter_Build:
+    name: Windows Flutter Binary Build
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: dev
+        
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'beta'
+    - run: |
+        ./build_flutter_win.bat
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git pull
+        git add binary_build/
+        git commit -m "generated flutter windows build"
+        git pull --no-edit
+        git push
+        git push -f origin dev
