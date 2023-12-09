@@ -1,0 +1,3 @@
+[submodule "Gmail-autolabel-forntend"]
+	path = Gmail-autolabel-forntend
+	url = https://github.com/jydv402/Gmail-autolabel-forntend.git
