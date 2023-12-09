@@ -52,7 +52,7 @@ if __name__ == "__main__":
             # print(f"Email content - {mail_body}\n")
         except Exception as e:
             print(f"Error fetching email content: {e}\n")
-            data_to_write = ('FAILED', message_id, f"Error fetching email content: {e}")
+            data_to_write = ('FAILED', message_id, '-', f"Error fetching email content: {e}")
             write_to_csv(data_to_write)
             continue
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
             print(f"reason - {reason}\n")
         except Exception as e:
             print(f"Error processing email: {e}\n")
-            data_to_write = ('FAILED', mail_subject, f"Error processing email: {e}")
+            data_to_write = ('FAILED', mail_subject, '-', f"Error processing email: {e}")
             write_to_csv(data_to_write)
             continue
 
