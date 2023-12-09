@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: dev
+        ref: main
         
     - uses: actions/setup-python@v4
       with:
@@ -33,7 +33,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: dev
+        ref: main
         
     - uses: subosito/flutter-action@v2
       with:
