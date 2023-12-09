@@ -1,15 +1,31 @@
-name: Windows Binary Build Workflow
+name: Windows Installer Build Workflow
 on:
   workflow_dispatch:
-    
+  
 jobs:
+
+  create_branch:
+    name: Create Branch on Remote
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Create Branch
+        run: |
+          git checkout -b build_branch main
+          git push origin build_branch
+
   Windows_Python_Build:
     name: Windows Python Binary Build
+    needs: [create_branch]
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: main
+        ref: build_branch
         
     - uses: actions/setup-python@v4
       with:
@@ -22,22 +38,23 @@ jobs:
         git config user.email github-actions@github.com
         git pull
         git add binary_build/
-        git commit -m "generated auto-labeller"
+        git commit -m "generated auto-label exe "
         git pull --no-edit
         git push
-        git push -f origin dev
+        git push -f origin build_branch
         
   Windows_Flutter_Build:
     name: Windows Flutter Binary Build
+    needs: [create_branch]
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: main
+        ref: build_branch
         
     - uses: subosito/flutter-action@v2
       with:
-        channel: 'beta'
+        channel: 'stable'
     - run: |
         ./build_flutter_win.bat
         git config user.name github-actions
@@ -47,4 +64,35 @@ jobs:
         git commit -m "generated flutter windows build"
         git pull --no-edit
         git push
-        git push -f origin dev
+        git push -f origin build_branch
+        
+  Installer_Build:
+    name: Installer Build
+    needs: [Windows_Python_Build,Windows_Flutter_Build]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: build_branch
+        
+      - name: Install NSIS
+        run: |
+          Invoke-WebRequest -Uri https://raw.githubusercontent.com/actions/runner-images/main/images/win/scripts/Installers/Install-NSIS.ps1 -OutFile Install-NSIS.ps1
+          .\Install-NSIS.ps1 -Version "3.06.1"
+
+      - name: Build installer
+        run: |
+          & 'C:\Program Files (x86)\NSIS\makensis.exe' nsis_script.nsi
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: autoLabel Installer
+          path: autoLabelInstaller.exe
+          
+      - name: Delete branch
+        run: |
+          git checkout dev
+          git branch -d build_branch
+          git push origin --delete build_branch
+
